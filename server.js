@@ -4,7 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-
+const allowedList = ["https://wakata.io", "http://localhost"]
 const app = express();
 
 let users = [];
@@ -21,7 +21,12 @@ let createChannel = (token, channelName) => {
 
   if (channels.find((c) => c.channelName === channelName))
     return { success: false, reason: "Channel already exists" };
-  channels.push({ channelName: channelName, creator: token, members: [], banned: [] });
+  channels.push({
+    channelName: channelName,
+    creator: token,
+    members: [],
+    banned: [],
+  });
   return { success: true };
 };
 
@@ -104,13 +109,18 @@ let validateToken = (token) => {
 };
 
 app.use(bodyParser.json());
-app.use(cors());
-
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (allowedList.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.get("/sourcecode", (req, res) => {
   res.send(require("fs").readFileSync(__filename).toString());
