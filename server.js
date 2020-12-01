@@ -5,10 +5,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const corsOptions = {
-	origin: "https://map-chat-cccs425.herokuapp.com/"
-};
-
 const app = express();
 
 let users = [];
@@ -108,7 +104,7 @@ let validateToken = (token) => {
 };
 
 app.use(bodyParser.json());
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.get("/sourcecode", (req, res) => {
   res.send(require("fs").readFileSync(__filename).toString());
