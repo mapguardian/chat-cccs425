@@ -4,7 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const allowedList = ["https://wakata.io", "http://localhost"]
+
 const app = express();
 
 let users = [];
@@ -107,14 +107,12 @@ let validateToken = (token) => {
   }
   return { success: false, reason: "Invalid token" };
 };
+let corsOptions = {
+  credentials: true,
+};
 
 app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: "https://wakata.io",
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 
 app.get("/sourcecode", (req, res) => {
   res.send(require("fs").readFileSync(__filename).toString());
