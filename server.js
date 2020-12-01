@@ -111,7 +111,7 @@ let corsOptions = {
   credentials: true,
 };
 
-app.use(bodyParser.json());
+app.use(bodyParser.raw());
 app.use(cors(corsOptions));
 
 app.get("/sourcecode", (req, res) => {
