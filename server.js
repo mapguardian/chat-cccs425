@@ -149,7 +149,7 @@ app.post("/login", (request, response) => {
 });
 
 app.post("/signup", (request, response) => {
-  console.log(request.body);
+  console.log("singup body" + request.body);
   let res = createNewUser(
     request.body.username || "",
     request.body.password || ""
