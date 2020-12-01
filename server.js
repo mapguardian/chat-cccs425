@@ -141,6 +141,7 @@ app.post("/login", (request, response) => {
 });
 
 app.post("/signup", (request, response) => {
+  console.log(request.body);
   let res = createNewUser(
     request.body.username || "",
     request.body.password || ""
