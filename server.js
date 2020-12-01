@@ -111,13 +111,7 @@ let validateToken = (token) => {
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (allowedList.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "https://wakata.io",
     credentials: true,
   })
 );
