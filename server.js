@@ -123,26 +123,29 @@ app.get("/", (request, response) => {
 });
 
 app.post("/create-channel", (request, response) => {
+  let values = JSON.parse(request.body);
   let res = createChannel(
     request.header("token") || "",
-    request.body.channelName || ""
+    values.channelName || ""
   );
   console.log(channels);
   response.json(res);
 });
 
 app.post("/join-channel", (request, response) => {
+  let values = JSON.parse(request.body);
   let res = joinChannel(
     request.header("token") || "",
-    request.body.channelName || ""
+    values.channelName || ""
   );
   response.json(res);
 });
 
 app.post("/login", (request, response) => {
+  let values = JSON.parse(request.body);
   let res = handleLogin(
-    request.body.username || "",
-    request.body.password || ""
+    values.username || "",
+    values.password || ""
   );
   console.log(loggedinUsers);
   response.json(res);
