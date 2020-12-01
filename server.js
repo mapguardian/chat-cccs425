@@ -149,10 +149,10 @@ app.post("/login", (request, response) => {
 });
 
 app.post("/signup", (request, response) => {
-  console.log("singup body" + JSON.stringify(request.body));
+  let values = JSON.parse(request.body);
   let res = createNewUser(
-    request.body.username || "",
-    request.body.password || ""
+    values.username || "",
+    values.password || ""
   );
   response.json(res);
 });
