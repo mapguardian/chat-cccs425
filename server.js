@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { response } = require("express");
 
 const app = express();
 
@@ -74,7 +75,7 @@ let handleLogin = (username, password) => {
 };
 
 let joinChannel = (token, channelName) => {
-  let tokenCheck = validateToken(token);
+  let (tokenCheck, username) = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
   let channelCheck = validateChannel(channelName);
@@ -82,15 +83,33 @@ let joinChannel = (token, channelName) => {
 
   let chan = channels.find((x) => x.channelName === channelName);
   if (chan) {
-    if (chan.members.find((x) => x === token))
-      return { success: false, reason: "User has already joined" };
-    if (chan.banned.find((x) => x === token))
+    if (chan.banned.indexOf(username) > -1)
       return { success: false, reason: "User is banned" };
-    chan.members.push(token);
+    if (chan.members.indexOf(username) > -1)
+      return { success: false, reason: "User has already joined" };
+    chan.members.push(username);
     return { success: true };
   }
 };
 
+let leaveChannel = (token, channelName) => {
+  let (tokenCheck, username) = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let chan = channels.find((x) => x.channelName === channelName);
+  if (chan) {
+    if (chan.banned.indexOf(username) > -1)
+      return { success: false, reason: "User is banned" };
+    if (chan.members.indexOf(username) > -1)
+      return { success: false, reason: "User has already joined" };
+    let idx = chan.members.indexOf(username);
+    chan.members.splice(idx, 1);
+    return { success: true };
+  }
+};
 let validateChannel = (channelName) => {
   if (channelName === "")
     return { success: false, reason: "channelName field missing" };
@@ -101,11 +120,14 @@ let validateChannel = (channelName) => {
 };
 
 let validateToken = (token) => {
-  if (token === "") return { success: false, reason: "token field missing" };
-  if (loggedinUsers.find((t) => t.token === token)) {
-    return { success: true };
-  }
-  return { success: false, reason: "Invalid token" };
+  if (token === "") return ({ success: false, reason: "token field missing" }, undefined);
+  let idx = loggedinUsers.map((e) => {
+    return e.token
+  }).indexOf(token);
+  
+  if (idx > -1) return ({ success: true }, loggedinUsers[idx].username);
+  
+  return ({ success: false, reason: "Invalid token" }, undefined);
 };
 let corsOptions = {
   credentials: true,
@@ -139,6 +161,16 @@ app.post("/join-channel", (request, response) => {
     values.channelName || ""
   );
   response.json(res);
+});
+
+app.post("/leave-channel", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = leaveChannel(
+    request.header("token") || "",
+    values.channelName || ""
+  );
+  response.json(res);
+  
 });
 
 app.post("/login", (request, response) => {
