@@ -4,7 +4,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { response } = require("express");
 
 const app = express();
 
@@ -23,10 +22,11 @@ let createChannel = (token, channelName) => {
   if (channels.find((c) => c.channelName === channelName))
     return { success: false, reason: "Channel already exists" };
   channels.push({
+    banned: [],
     channelName: channelName,
     creator: username,
     members: [],
-    banned: [],
+    messages: [],
   });
   return { success: true };
 };
@@ -66,8 +66,9 @@ let deleteChan = (token, channelName) => {
     return { success: true };
   }
 
-  // this should return false but in the spec there is no check for 
-  // delete when the user didn't create the channel
+  // this should return false but in the spec there is no check for
+  // delete when the user didn't create the channel so we will silently
+  // return true
   return { success: true };
 };
 
@@ -148,6 +149,24 @@ let leaveChannel = (token, channelName) => {
   }
 };
 
+let message = (token, channelName, msg) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  if (msg === "") return { success: false, reason: "contents field missing" };
+
+  let chan = channels.find((x) => x.channelName === channelName);
+  if (chan.members.indexOf(username) === -1)
+    return { success: false, reason: "User is not part of this channel" };
+
+  chan.messages.push({ from: username, contents: msg });
+
+  return { success: true };
+};
+
 let validateChannel = (channelName) => {
   if (channelName === "")
     return { success: false, reason: "channelName field missing" };
@@ -170,6 +189,7 @@ let validateToken = (token) => {
 
   return [{ success: false, reason: "Invalid token" }, undefined];
 };
+
 let corsOptions = {
   credentials: true,
 };
@@ -197,10 +217,7 @@ app.post("/create-channel", (request, response) => {
 
 app.post("/delete", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = deleteChan(
-    request.header("token") || "",
-    values.channelName || ""
-  );
+  let res = deleteChan(request.header("token") || "", values.channelName || "");
   response.json(res);
 });
 
@@ -234,6 +251,12 @@ app.post("/login", (request, response) => {
   let values = JSON.parse(request.body);
   let res = handleLogin(values.username || "", values.password || "");
   console.log(loggedinUsers);
+  response.json(res);
+});
+
+app.post("/message", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = message(request.header("token") || "", values.contents || "");
   response.json(res);
 });
 
