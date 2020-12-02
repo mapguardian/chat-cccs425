@@ -67,7 +67,7 @@ let handleLogin = (username, password) => {
     let token = getToken();
     loggedinUsers = loggedinUsers.filter((x) => x.username !== username);
     loggedinUsers.push({ username: username, token: token });
-    return { sucess: true, token: token };
+    return { success: true, token: token };
   }
 
   return { success: false, reason: "User does not exist" };
