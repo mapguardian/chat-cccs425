@@ -195,6 +195,15 @@ app.post("/create-channel", (request, response) => {
   response.json(res);
 });
 
+app.post("/delete", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = createChannel(
+    request.header("token") || "",
+    values.channelName || ""
+  );
+  response.json(res);
+});
+
 app.get("/joined", (request, response) => {
   let res = joined(
     request.header("token") || "",
