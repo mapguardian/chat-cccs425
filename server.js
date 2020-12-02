@@ -13,7 +13,7 @@ let loggedinUsers = [];
 let channels = [];
 
 let createChannel = (token, channelName) => {
-  let tokenCheck = validateToken(token);
+  let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
   console.log(tokenCheck);
 
@@ -24,7 +24,7 @@ let createChannel = (token, channelName) => {
     return { success: false, reason: "Channel already exists" };
   channels.push({
     channelName: channelName,
-    creator: token,
+    creator: username,
     members: [],
     banned: [],
   });
