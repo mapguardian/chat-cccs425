@@ -47,6 +47,30 @@ let createNewUser = (username, password) => {
   return { success: true };
 };
 
+let deleteChan = (token, channelName) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let idx = channels
+    .map((e) => {
+      return e.channelName;
+    })
+    .indexOf(channelName);
+
+  let chan = channels[idx];
+  if (chan.creator === username) {
+    channel = channels.splice(idx, 1);
+    return { success: true };
+  }
+
+  // this should return false but in the spec there is no check for 
+  // delete when the user didn't create the channel
+  return { success: true };
+};
+
 let getToken = () => {
   let randomData =
     Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
@@ -92,6 +116,21 @@ let joinChannel = (token, channelName) => {
   }
 };
 
+let joined = (token, channelName) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let chan = channels.find((x) => x.channelName === channelName);
+
+  if (chan.members.indexOf(username) === -1)
+    return { success: false, reason: "User is not part of this channel" };
+
+  return { success: true, joined: chan.members };
+};
+
 let leaveChannel = (token, channelName) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
@@ -101,15 +140,14 @@ let leaveChannel = (token, channelName) => {
 
   let chan = channels.find((x) => x.channelName === channelName);
   if (chan) {
-    if (chan.banned.indexOf(username) > -1)
-      return { success: false, reason: "User is banned" };
-    if (chan.members.indexOf(username) > -1)
-      return { success: false, reason: "User has already joined" };
+    if (chan.members.indexOf(username) === -1)
+      return { success: false, reason: "User is not part of this channel" };
     let idx = chan.members.indexOf(username);
     chan.members.splice(idx, 1);
     return { success: true };
   }
 };
+
 let validateChannel = (channelName) => {
   if (channelName === "")
     return { success: false, reason: "channelName field missing" };
@@ -120,13 +158,16 @@ let validateChannel = (channelName) => {
 };
 
 let validateToken = (token) => {
-  if (token === "") return [{ success: false, reason: "token field missing" }, undefined];
-  let idx = loggedinUsers.map((e) => {
-    return e.token
-  }).indexOf(token);
-  
+  if (token === "")
+    return [{ success: false, reason: "token field missing" }, undefined];
+  let idx = loggedinUsers
+    .map((e) => {
+      return e.token;
+    })
+    .indexOf(token);
+
   if (idx > -1) return [{ success: true }, loggedinUsers[idx].username];
-  
+
   return [{ success: false, reason: "Invalid token" }, undefined];
 };
 let corsOptions = {
@@ -154,6 +195,14 @@ app.post("/create-channel", (request, response) => {
   response.json(res);
 });
 
+app.get("/joined", (request, response) => {
+  let res = joined(
+    request.header("token") || "",
+    request.query.channelName || ""
+  );
+  response.json(res);
+});
+
 app.post("/join-channel", (request, response) => {
   let values = JSON.parse(request.body);
   let res = joinChannel(
@@ -170,25 +219,18 @@ app.post("/leave-channel", (request, response) => {
     values.channelName || ""
   );
   response.json(res);
-  
 });
 
 app.post("/login", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = handleLogin(
-    values.username || "",
-    values.password || ""
-  );
+  let res = handleLogin(values.username || "", values.password || "");
   console.log(loggedinUsers);
   response.json(res);
 });
 
 app.post("/signup", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = createNewUser(
-    values.username || "",
-    values.password || ""
-  );
+  let res = createNewUser(values.username || "", values.password || "");
   response.json(res);
 });
 
