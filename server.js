@@ -256,7 +256,7 @@ app.post("/login", (request, response) => {
 
 app.post("/message", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = message(request.header("token") || "", values.contents || "");
+  let res = message(request.header("token") || "", values.channelName || "", values.contents || "");
   response.json(res);
 });
 
