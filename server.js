@@ -75,7 +75,7 @@ let handleLogin = (username, password) => {
 };
 
 let joinChannel = (token, channelName) => {
-  let (tokenCheck, username) = validateToken(token);
+  let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
   let channelCheck = validateChannel(channelName);
@@ -93,7 +93,7 @@ let joinChannel = (token, channelName) => {
 };
 
 let leaveChannel = (token, channelName) => {
-  let (tokenCheck, username) = validateToken(token);
+  let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
   let channelCheck = validateChannel(channelName);
@@ -120,14 +120,14 @@ let validateChannel = (channelName) => {
 };
 
 let validateToken = (token) => {
-  if (token === "") return ({ success: false, reason: "token field missing" }, undefined);
+  if (token === "") return [{ success: false, reason: "token field missing" }, undefined];
   let idx = loggedinUsers.map((e) => {
     return e.token
   }).indexOf(token);
   
-  if (idx > -1) return ({ success: true }, loggedinUsers[idx].username);
+  if (idx > -1) return [{ success: true }, loggedinUsers[idx].username];
   
-  return ({ success: false, reason: "Invalid token" }, undefined);
+  return [{ success: false, reason: "Invalid token" }, undefined];
 };
 let corsOptions = {
   credentials: true,
