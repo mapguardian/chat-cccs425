@@ -197,7 +197,7 @@ app.post("/create-channel", (request, response) => {
 
 app.post("/delete", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = createChannel(
+  let res = deleteChan(
     request.header("token") || "",
     values.channelName || ""
   );
