@@ -18,7 +18,7 @@ let ban = (token, channelName, target) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let chan = getChannel(channelName);
+  let [chan, _] = getChannel(channelName);
 
   if (chan.creator === username) {
     chan.banned.push(target);
@@ -71,7 +71,7 @@ let deleteChan = (token, channelName) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let chan = getChannel(channelName);
+  let [chan, idx] = getChannel(channelName);
   if (chan.creator === username) {
     channel = channels.splice(idx, 1);
     return { success: true };
@@ -90,7 +90,7 @@ let getChannel = (channelName) => {
     })
     .indexOf(channelName);
 
-  return channels[idx];
+  return [channels[idx], idx];
 };
 let getToken = () => {
   let randomData =
@@ -126,7 +126,7 @@ let joinChannel = (token, channelName) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let chan = getChannel(channelName);
+  let [chan, _] = getChannel(channelName);
   if (chan) {
     if (chan.banned.indexOf(username) > -1)
       return { success: false, reason: "User is banned" };
@@ -159,7 +159,7 @@ let kick = (token, channelName, target) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let chan = getChannel(channelName);
+  let [chan, _] = getChannel(channelName);
   if (chan.creator === username) {
     let targetIdx = chan.members.indexOf(target);
     if (targetIdx > -1) {
@@ -197,7 +197,7 @@ let message = (token, channelName, msg) => {
 
   if (msg === "") return { success: false, reason: "contents field missing" };
 
-  let chan = getChannel(channelName);
+  let [chan, _] = getChannel(channelName);
   if (chan.members.indexOf(username) === -1)
     return { success: false, reason: "User is not part of this channel" };
 
