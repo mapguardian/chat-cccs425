@@ -197,8 +197,8 @@ let message = (token, channelName, msg) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
-  // let channelCheck = validateChannel(channelName);
-  // if (!channelCheck.success) return channelCheck;
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success && channelCheck.reason !== "Channel does not exist") return channelCheck;
 
   if (msg === "") return { success: false, reason: "contents field missing" };
 
