@@ -11,6 +11,23 @@ let users = [];
 let loggedinUsers = [];
 let channels = [];
 
+let ban = (token, channelName, target) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let chan = getChannel(channelName);
+
+  if (chan.creator === username) {
+    chan.banned.push(target);
+    return { success: true };
+  }
+
+  return { success: false, reason: "Channel not owned by user" };
+};
+
 let createChannel = (token, channelName) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
@@ -54,13 +71,7 @@ let deleteChan = (token, channelName) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let idx = channels
-    .map((e) => {
-      return e.channelName;
-    })
-    .indexOf(channelName);
-
-  let chan = channels[idx];
+  let chan = getChannel(channelName);
   if (chan.creator === username) {
     channel = channels.splice(idx, 1);
     return { success: true };
@@ -72,6 +83,15 @@ let deleteChan = (token, channelName) => {
   return { success: true };
 };
 
+let getChannel = (channelName) => {
+  let idx = channels
+    .map((e) => {
+      return e.channelName;
+    })
+    .indexOf(channelName);
+
+  return channels[idx];
+};
 let getToken = () => {
   let randomData =
     Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
@@ -106,7 +126,7 @@ let joinChannel = (token, channelName) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
-  let chan = channels.find((x) => x.channelName === channelName);
+  let chan = getChannel(channelName);
   if (chan) {
     if (chan.banned.indexOf(username) > -1)
       return { success: false, reason: "User is banned" };
@@ -130,6 +150,25 @@ let joined = (token, channelName) => {
     return { success: false, reason: "User is not part of this channel" };
 
   return { success: true, joined: chan.members };
+};
+
+let kick = (token, channelName, target) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let chan = getChannel(channelName);
+  if (chan.creator === username) {
+    let targetIdx = chan.members.indexOf(target);
+    if (targetIdx > -1) {
+      chan.members.splice(targetIdx, 1);
+    }
+    return { success: true };
+  }
+
+  return { success: false, reason: "Channel not owned by user" };
 };
 
 let leaveChannel = (token, channelName) => {
@@ -158,12 +197,11 @@ let message = (token, channelName, msg) => {
 
   if (msg === "") return { success: false, reason: "contents field missing" };
 
-  let chan = channels.find((x) => x.channelName === channelName);
+  let chan = getChannel(channelName);
   if (chan.members.indexOf(username) === -1)
     return { success: false, reason: "User is not part of this channel" };
 
   chan.messages.push({ from: username, contents: msg });
-
   return { success: true };
 };
 
@@ -205,6 +243,16 @@ app.get("/", (request, response) => {
   response.sendFile(__dirname + "/views/index.html");
 });
 
+app.post("/ban", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = ban(
+    request.header("token") || "",
+    values.channelName || "",
+    values.target || ""
+  );
+  response.json(res);
+});
+
 app.post("/create-channel", (request, response) => {
   let values = JSON.parse(request.body);
   let res = createChannel(
@@ -238,6 +286,16 @@ app.post("/join-channel", (request, response) => {
   response.json(res);
 });
 
+app.post("/kick", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = kick(
+    request.header("token") || "",
+    values.channelName || "",
+    values.target || ""
+  );
+  response.json(res);
+});
+
 app.post("/leave-channel", (request, response) => {
   let values = JSON.parse(request.body);
   let res = leaveChannel(
@@ -256,7 +314,11 @@ app.post("/login", (request, response) => {
 
 app.post("/message", (request, response) => {
   let values = JSON.parse(request.body);
-  let res = message(request.header("token") || "", values.channelName || "", values.contents || "");
+  let res = message(
+    request.header("token") || "",
+    values.channelName || "",
+    values.contents || ""
+  );
   response.json(res);
 });
 
