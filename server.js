@@ -94,6 +94,7 @@ let getChannel = (channelName) => {
 
   return [channels[idx], idx];
 };
+
 let getToken = () => {
   let randomData =
     Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
@@ -196,13 +197,13 @@ let message = (token, channelName, msg) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
+  // let channelCheck = validateChannel(channelName);
+  // if (!channelCheck.success) return channelCheck;
 
   if (msg === "") return { success: false, reason: "contents field missing" };
 
-  let [chan, _] = getChannel(channelName);
-  if (chan.members.indexOf(username) === -1)
+  let [chan, chanIdx] = getChannel(channelName);
+  if (chan.members.indexOf(username) === -1 || chanIdx === -1)
     return { success: false, reason: "User is not part of this channel" };
 
   chan.messages.push({ from: username, contents: msg });
