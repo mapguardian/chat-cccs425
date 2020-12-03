@@ -198,7 +198,8 @@ let message = (token, channelName, msg) => {
   if (!tokenCheck.success) return tokenCheck;
 
   let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success && channelCheck.reason !== "Channel does not exist") return channelCheck;
+  if (!channelCheck.success && channelCheck.reason !== "Channel does not exist")
+    return channelCheck;
 
   if (msg === "") return { success: false, reason: "contents field missing" };
 
@@ -208,6 +209,20 @@ let message = (token, channelName, msg) => {
 
   chan.messages.push({ from: username, contents: msg });
   return { success: true };
+};
+
+let messages = (token, channelName) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let channelCheck = validateChannel(channelName);
+  if (!channelCheck.success) return channelCheck;
+
+  let [chan, chanIdx] = getChannel(channelName);
+  if (chanIdx === -1 || chan.members.indexOf(username) === -1)
+    return { success: false, reason: "User is not part of this channel" };
+
+  return { success: true, messages: chan.messages };
 };
 
 let validateChannel = (channelName) => {
@@ -323,6 +338,14 @@ app.post("/message", (request, response) => {
     request.header("token") || "",
     values.channelName || "",
     values.contents || ""
+  );
+  response.json(res);
+});
+
+app.get("/messages", (request, response) => {
+  let res = messages(
+    request.header("token") || "",
+    request.query.channelName || ""
   );
   response.json(res);
 });
