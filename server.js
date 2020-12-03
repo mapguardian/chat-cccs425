@@ -203,7 +203,7 @@ let message = (token, channelName, msg) => {
   if (msg === "") return { success: false, reason: "contents field missing" };
 
   let [chan, chanIdx] = getChannel(channelName);
-  if (chan.members.indexOf(username) === -1 || chanIdx === -1)
+  if (chanIdx === -1 || chan.members.indexOf(username) === -1)
     return { success: false, reason: "User is not part of this channel" };
 
   chan.messages.push({ from: username, contents: msg });
