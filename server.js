@@ -159,6 +159,7 @@ let kick = (token, channelName, target) => {
   let channelCheck = validateChannel(channelName);
   if (!channelCheck.success) return channelCheck;
 
+  if (target === "") return { success: false, reason: "target field missing" };
   let [chan, _] = getChannel(channelName);
   if (chan.creator === username) {
     let targetIdx = chan.members.indexOf(target);
