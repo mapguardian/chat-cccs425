@@ -73,10 +73,7 @@ let getItem = (itemId) => {
   return { success: true, listing: listings[idx] };
 };
 
-let getListing = (token, listingId) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
+let getListing = (listingId) => {
   return getItem(listingId);
 };
 
@@ -163,7 +160,6 @@ app.post("/create-listing", (request, response) => {
 
 app.get("/listing", (request, response) => {
   let res = getListing(
-    request.header("token") || "",
     request.query.listingId || ""
   );
   response.json(res);
