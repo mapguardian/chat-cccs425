@@ -30,7 +30,7 @@ let changePassowrd = (token, oldPassword, newPassword) => {
   return { success: true };
 };
 
-let createListing = (price, description) => {
+let createListing = (token, price, description) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
@@ -40,7 +40,7 @@ let createListing = (price, description) => {
     return { success: false, reason: "description field missing" };
 
 let itemId = getNewListingId()
-  listings.push({ itemId, price, description });
+  listings.push({ price, description, itemId, sellerUsername: username });
 
   return { success: true, listingId: itemId };
 };
