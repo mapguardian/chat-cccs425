@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { response } = require("express");
 
 const app = express();
 
@@ -39,7 +40,7 @@ let createListing = (token, price, description) => {
   if (description === "")
     return { success: false, reason: "description field missing" };
 
-let itemId = getNewListingId()
+  let itemId = getNewListingId();
   listings.push({ price, description, itemId, sellerUsername: username });
 
   return { success: true, listingId: itemId };
@@ -59,6 +60,24 @@ let createNewUser = (username, password) => {
   users.push({ username: username, password: password });
 
   return { success: true };
+};
+
+let getItem = (itemId) => {
+  let idx = listings
+    .map((e) => {
+      return e.itemId;
+    })
+    .indexOf(itemId);
+
+  if (idx > -1) return { success: false, reason: "Invalid listing id" };
+  return { success: true, listing: listings[idx] };
+};
+
+let getListing = (token, listingId) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  return getItem(listingId);
 };
 
 let getNewListingId = () => {
@@ -138,6 +157,14 @@ app.post("/create-listing", (request, response) => {
     request.header("token") || "",
     values.price || "",
     values.description || ""
+  );
+  response.json(res);
+});
+
+app.get("/listing", (request, response) => {
+  let res = getListing(
+    request.header("token") || "",
+    request.query.listingId || ""
   );
   response.json(res);
 });
