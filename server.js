@@ -101,7 +101,7 @@ app.get("/", (request, response) => {
   response.sendFile(__dirname + "/views/index.html");
 });
 
-app.post("/change-password", () => {
+app.post("/change-password", (request, response) => {
   let values = JSON.parse(request.body);
   let res = changePassowrd(
     request.header("token") || "",
