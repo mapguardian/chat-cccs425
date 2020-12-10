@@ -9,44 +9,23 @@ const app = express();
 
 let users = [];
 let loggedinUsers = [];
-let channels = [];
 
-let ban = (token, channelName, target) => {
+let changePassowrd = (token, oldPassword, newPassword) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
+  let currentUserIdx = users
+    .map((u) => {
+      return u.username;
+    })
+    .indexOf(username);
+  let currentUser = users[currentUserIdx];
 
-  if (target === "") return { success: false, reason: "target field missing" };
+  if (currentUser.password !== oldPassword)
+    return { success: false, reason: "Unable to authenticate" };
 
-  let [chan, _] = getChannel(channelName);
+  currentUser.password = newPassword;
 
-  if (chan.creator === username) {
-    chan.banned.push(target);
-    return { success: true };
-  }
-
-  return { success: false, reason: "Channel not owned by user" };
-};
-
-let createChannel = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-  console.log(tokenCheck);
-
-  if (channelName === "")
-    return { success: false, reason: "channelName field missing" };
-
-  if (channels.find((c) => c.channelName === channelName))
-    return { success: false, reason: "Channel already exists" };
-  channels.push({
-    banned: [],
-    channelName: channelName,
-    creator: username,
-    members: [],
-    messages: [],
-  });
   return { success: true };
 };
 
@@ -64,35 +43,6 @@ let createNewUser = (username, password) => {
   users.push({ username: username, password: password });
 
   return { success: true };
-};
-
-let deleteChan = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  let [chan, idx] = getChannel(channelName);
-  if (chan.creator === username) {
-    channel = channels.splice(idx, 1);
-    return { success: true };
-  }
-
-  // this should return false but in the spec there is no check for
-  // delete when the user didn't create the channel so we will silently
-  // return true
-  return { success: true };
-};
-
-let getChannel = (channelName) => {
-  let idx = channels
-    .map((e) => {
-      return e.channelName;
-    })
-    .indexOf(channelName);
-
-  return [channels[idx], idx];
 };
 
 let getToken = () => {
@@ -120,118 +70,6 @@ let handleLogin = (username, password) => {
   }
 
   return { success: false, reason: "User does not exist" };
-};
-
-let joinChannel = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  let [chan, _] = getChannel(channelName);
-  if (chan) {
-    if (chan.banned.indexOf(username) > -1)
-      return { success: false, reason: "User is banned" };
-    if (chan.members.indexOf(username) > -1)
-      return { success: false, reason: "User has already joined" };
-    chan.members.push(username);
-    return { success: true };
-  }
-};
-
-let joined = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  let chan = channels.find((x) => x.channelName === channelName);
-
-  if (chan.members.indexOf(username) === -1)
-    return { success: false, reason: "User is not part of this channel" };
-
-  return { success: true, joined: chan.members };
-};
-
-let kick = (token, channelName, target) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  if (target === "") return { success: false, reason: "target field missing" };
-
-  let [chan, _] = getChannel(channelName);
-  if (chan.creator === username) {
-    let targetIdx = chan.members.indexOf(target);
-    if (targetIdx > -1) {
-      chan.members.splice(targetIdx, 1);
-    }
-    return { success: true };
-  }
-
-  return { success: false, reason: "Channel not owned by user" };
-};
-
-let leaveChannel = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  let chan = channels.find((x) => x.channelName === channelName);
-  if (chan) {
-    if (chan.members.indexOf(username) === -1)
-      return { success: false, reason: "User is not part of this channel" };
-    let idx = chan.members.indexOf(username);
-    chan.members.splice(idx, 1);
-    return { success: true };
-  }
-};
-
-let message = (token, channelName, msg) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success && channelCheck.reason !== "Channel does not exist")
-    return channelCheck;
-
-  if (msg === "") return { success: false, reason: "contents field missing" };
-
-  let [chan, chanIdx] = getChannel(channelName);
-  if (chanIdx === -1 || chan.members.indexOf(username) === -1)
-    return { success: false, reason: "User is not part of this channel" };
-
-  chan.messages.push({ from: username, contents: msg });
-  return { success: true };
-};
-
-let messages = (token, channelName) => {
-  let [tokenCheck, username] = validateToken(token);
-  if (!tokenCheck.success) return tokenCheck;
-
-  let channelCheck = validateChannel(channelName);
-  if (!channelCheck.success) return channelCheck;
-
-  let [chan, chanIdx] = getChannel(channelName);
-  if (chanIdx === -1 || chan.members.indexOf(username) === -1)
-    return { success: false, reason: "User is not part of this channel" };
-
-  return { success: true, messages: chan.messages };
-};
-
-let validateChannel = (channelName) => {
-  if (channelName === "")
-    return { success: false, reason: "channelName field missing" };
-  if (channels.find((c) => c.channelName === channelName)) {
-    return { success: true };
-  }
-  return { success: false, reason: "Channel does not exist" };
 };
 
 let validateToken = (token) => {
@@ -263,64 +101,12 @@ app.get("/", (request, response) => {
   response.sendFile(__dirname + "/views/index.html");
 });
 
-app.post("/ban", (request, response) => {
+app.post("/change-password", () => {
   let values = JSON.parse(request.body);
-  let res = ban(
+  let res = changePassowrd(
     request.header("token") || "",
-    values.channelName || "",
-    values.target || ""
-  );
-  response.json(res);
-});
-
-app.post("/create-channel", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = createChannel(
-    request.header("token") || "",
-    values.channelName || ""
-  );
-  console.log(channels);
-  response.json(res);
-});
-
-app.post("/delete", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = deleteChan(request.header("token") || "", values.channelName || "");
-  response.json(res);
-});
-
-app.get("/joined", (request, response) => {
-  let res = joined(
-    request.header("token") || "",
-    request.query.channelName || ""
-  );
-  response.json(res);
-});
-
-app.post("/join-channel", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = joinChannel(
-    request.header("token") || "",
-    values.channelName || ""
-  );
-  response.json(res);
-});
-
-app.post("/kick", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = kick(
-    request.header("token") || "",
-    values.channelName || "",
-    values.target || ""
-  );
-  response.json(res);
-});
-
-app.post("/leave-channel", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = leaveChannel(
-    request.header("token") || "",
-    values.channelName || ""
+    values.oldPassword || "",
+    values.newPassword || ""
   );
   response.json(res);
 });
@@ -329,24 +115,6 @@ app.post("/login", (request, response) => {
   let values = JSON.parse(request.body);
   let res = handleLogin(values.username || "", values.password || "");
   console.log(loggedinUsers);
-  response.json(res);
-});
-
-app.post("/message", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = message(
-    request.header("token") || "",
-    values.channelName || "",
-    values.contents || ""
-  );
-  response.json(res);
-});
-
-app.get("/messages", (request, response) => {
-  let res = messages(
-    request.header("token") || "",
-    request.query.channelName || ""
-  );
   response.json(res);
 });
 
