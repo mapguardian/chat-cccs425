@@ -39,9 +39,10 @@ let createListing = (price, description) => {
   if (description === "")
     return { success: false, reason: "description field missing" };
 
-  listings.push({ listingId: getNewListingId(), price, description });
+let itemId = getNewListingId()
+  listings.push({ itemId, price, description });
 
-  return { success: true };
+  return { success: true, listingId: itemId };
 };
 
 let createNewUser = (username, password) => {
