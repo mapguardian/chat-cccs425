@@ -9,6 +9,7 @@ const app = express();
 
 let users = [];
 let loggedinUsers = [];
+let listings = [];
 
 let changePassowrd = (token, oldPassword, newPassword) => {
   let [tokenCheck, username] = validateToken(token);
@@ -29,6 +30,20 @@ let changePassowrd = (token, oldPassword, newPassword) => {
   return { success: true };
 };
 
+let createListing = (price, description) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  if (price === "") return { success: false, reason: "price field missing" };
+
+  if (description === "")
+    return { success: false, reason: "description field missing" };
+
+  listings.push({ listingId: getNewListingId(), price, description });
+
+  return { success: true };
+};
+
 let createNewUser = (username, password) => {
   if (username === "") {
     return { success: false, reason: "username field missing" };
@@ -43,6 +58,11 @@ let createNewUser = (username, password) => {
   users.push({ username: username, password: password });
 
   return { success: true };
+};
+
+let getNewListingId = () => {
+  let randomData = Math.random().toString(36).substr(2);
+  return randomData;
 };
 
 let getToken = () => {
@@ -107,6 +127,16 @@ app.post("/change-password", (request, response) => {
     request.header("token") || "",
     values.oldPassword || "",
     values.newPassword || ""
+  );
+  response.json(res);
+});
+
+app.post("/create-listing", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = createListing(
+    request.header("token") || "",
+    values.price || "",
+    values.description || ""
   );
   response.json(res);
 });
