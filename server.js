@@ -69,7 +69,7 @@ let getItem = (itemId) => {
     })
     .indexOf(itemId);
 
-  if (idx > -1) return { success: false, reason: "Invalid listing id" };
+  if (idx === -1) return { success: false, reason: "Invalid listing id" };
   return { success: true, listing: listings[idx] };
 };
 
