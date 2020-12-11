@@ -19,12 +19,12 @@ let addToCart = (token, itemid) => {
   if (itemid === "") return { success: false, reason: "itemid field missing" };
 
   let [item, idx] = getItem(itemid);
-
   if (idx === -1) return { success: false, reason: "Item not found" };
 
-  let [cart, cidx] = getCart(username);
+  let [_, cidx] = getCart(username);
 
   carts[cidx].cart.push(item);
+  return { success: true };
 };
 
 let changePassowrd = (token, oldPassword, newPassword) => {
@@ -78,7 +78,7 @@ let createNewUser = (username, password) => {
 };
 
 let getCart = (username) => {
-    console.log("in get cart count:", getCartCount++);
+  console.log("in get cart count:", getCartCount++);
   let idx = carts
     .map((e) => {
       return e.username;
