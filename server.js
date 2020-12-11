@@ -27,6 +27,15 @@ let addToCart = (token, itemid) => {
   return { success: true };
 };
 
+let cart = (token) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let [cart, _] = getCart(username);
+
+  return { success: true, cart: cart.cart };
+};
+
 let changePassowrd = (token, oldPassword, newPassword) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
@@ -192,6 +201,11 @@ app.get("/", (request, response) => {
 app.post("/add-to-cart", (request, response) => {
   let values = JSON.parse(request.body);
   let res = addToCart(request.header("token") || "", values.itemid || "");
+  response.json(res);
+});
+
+app.get("/cart", (request, response) => {
+  let res = cart(request.header("token") || "");
   response.json(res);
 });
 
