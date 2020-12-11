@@ -67,6 +67,7 @@ let checkout = (token) => {
 
   carts[idx].cart.map((c) => {
     let [item, iidx] = getItem(c.itemid);
+    console.log(JSON.stringify(item), iidx);
     if (iidx === -1)
       return { success: false, reason: "Item in cart no longer available" };
 
