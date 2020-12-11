@@ -85,8 +85,8 @@ let getCart = (username) => {
     .indexOf(username);
 
   if (idx === -1) {
-    idx = carts.length;
     carts.push({ username, cart: [] });
+    idx = carts.length - 1;
   }
 
   return [carts[idx], idx];
