@@ -78,14 +78,17 @@ let getListing = (listingId) => {
 };
 
 let getNewListingId = () => {
-  let randomData = Math.random().toString(36).substr(2);
+  let randomData = getRandomData();
   return randomData;
 };
 
 let getToken = () => {
-  let randomData =
-    Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+  let randomData = getRandomData() + getRandomData();
   return randomData;
+};
+
+let getRandomData = () => {
+  return Math.random().toString(36).substr(2);
 };
 
 let handleLogin = (username, password) => {
@@ -107,6 +110,22 @@ let handleLogin = (username, password) => {
   }
 
   return { success: false, reason: "User does not exist" };
+};
+
+let modifyListing = (token, itemId, description, price) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  if (itemId === "") return { success: false, reason: "itemid field missing" };
+
+  let item = getItem(itemId);
+
+  if (item.sellerUsername !== username) return { success: false };
+
+  item.price = price;
+  item.description = description;
+
+  return { success: true };
 };
 
 let validateToken = (token) => {
@@ -159,9 +178,7 @@ app.post("/create-listing", (request, response) => {
 });
 
 app.get("/listing", (request, response) => {
-  let res = getListing(
-    request.query.listingId || ""
-  );
+  let res = getListing(request.query.listingId || "");
   response.json(res);
 });
 
@@ -169,6 +186,17 @@ app.post("/login", (request, response) => {
   let values = JSON.parse(request.body);
   let res = handleLogin(values.username || "", values.password || "");
   console.log(loggedinUsers);
+  response.json(res);
+});
+
+app.post("/modify-listing", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = modifyListing(
+    request.header("token") || "",
+    values.itemId || "",
+    values.price || "",
+    values.description || ""
+  );
   response.json(res);
 });
 
