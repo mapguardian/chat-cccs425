@@ -112,7 +112,7 @@ let handleLogin = (username, password) => {
   return { success: false, reason: "User does not exist" };
 };
 
-let modifyListing = (token, itemId, description, price) => {
+let modifyListing = (token, itemId, price, description) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
