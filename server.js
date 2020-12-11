@@ -7,10 +7,11 @@ const cors = require("cors");
 
 const app = express();
 let carts = [];
+let getCartCount = 0;
 let users = [];
 let loggedinUsers = [];
 let listings = [];
-let getCartCount = 0;
+let purchases = [];
 
 let addToCart = (token, itemid) => {
   let [tokenCheck, username] = validateToken(token);
@@ -52,6 +53,27 @@ let changePassowrd = (token, oldPassword, newPassword) => {
 
   currentUser.password = newPassword;
 
+  return { success: true };
+};
+
+let checkout = (token) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let [_, idx] = getCart(username);
+  if (carts[idx].cart === undefined || carts[idx].cart.length === 0) {
+    return { success: false, reason: "Empty cart" };
+  }
+
+  carts[idx].cart.map((c) => {
+    let [item, iidx] = getItem(c.itemid);
+    if (iidx === -1)
+      return { success: false, reason: "Item in cart no longer available" };
+
+    let [purchased, pidx] = getPurchases(username);
+    purchases[pidx].purchased.push(item);
+    listings = listings.splice(iidx, 1);
+  });
   return { success: true };
 };
 
@@ -121,6 +143,21 @@ let getListing = (listingId) => {
 let getNewListingId = () => {
   let randomData = getRandomData();
   return randomData;
+};
+
+let getPurchases = (username) => {
+  let idx = purchases
+    .map((e) => {
+      return e.username;
+    })
+    .indexOf(username);
+
+  if (idx === -1) {
+    purchases.push({ username, purchased: [] });
+    idx = purchases.length - 1;
+  }
+
+  return [purchases[idx], idx];
 };
 
 let getToken = () => {
@@ -216,6 +253,11 @@ app.post("/change-password", (request, response) => {
     values.oldPassword || "",
     values.newPassword || ""
   );
+  response.json(res);
+});
+
+app.post("/checkout", (request, response) => {
+  let res = checkout(request.header("token") || "");
   response.json(res);
 });
 
