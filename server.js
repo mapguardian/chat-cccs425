@@ -193,7 +193,7 @@ app.post("/modify-listing", (request, response) => {
   let values = JSON.parse(request.body);
   let res = modifyListing(
     request.header("token") || "",
-    values.itemId || "",
+    values.itemid || "",
     values.price || "",
     values.description || ""
   );
