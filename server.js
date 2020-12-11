@@ -4,7 +4,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { response } = require("express");
 
 const app = express();
 
@@ -69,12 +68,13 @@ let getItem = (itemId) => {
     })
     .indexOf(itemId);
 
-  if (idx === -1) return { success: false, reason: "Invalid listing id" };
-  return { success: true, listing: listings[idx] };
+  return [listings[idx], idx];
 };
 
 let getListing = (listingId) => {
-  return getItem(listingId);
+  let [item, idx] = getItem(listingId);
+  if (idx === -1) return { success: false, reason: "Invalid listing id" };
+  return { success: true, listing: item };
 };
 
 let getNewListingId = () => {
@@ -118,12 +118,12 @@ let modifyListing = (token, itemId, description, price) => {
 
   if (itemId === "") return { success: false, reason: "itemid field missing" };
 
-  let item = getItem(itemId);
+  let [item, idx] = getItem(itemId);
 
   //if (item.sellerUsername !== username) return { success: false };
 
-  item.price = price;
-  item.description = description;
+  listings[idx].price = price;
+  listings[idx].description = description;
 
   return { success: true };
 };
