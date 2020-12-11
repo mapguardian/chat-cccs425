@@ -65,17 +65,20 @@ let checkout = (token) => {
     return { success: false, reason: "Empty cart" };
   }
 
+  let res = {};
   carts[idx].cart.map((c) => {
     let [item, iidx] = getItem(c.itemid);
     console.log(c.itemid, JSON.stringify(item), iidx);
-    if (iidx === -1)
-      return { success: false, reason: "Item in cart no longer available" };
-
+    if (iidx === -1) {
+      res = { success: false, reason: "Item in cart no longer available" };
+      break;
+    }
     let [purchased, pidx] = getPurchases(username);
     purchases[pidx].purchased.push(item);
     listings = listings.splice(iidx, 1);
+    res = { success: true };
   });
-  return { success: true };
+  return res;
 };
 
 let createListing = (token, price, description) => {
