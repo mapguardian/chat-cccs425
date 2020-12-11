@@ -22,9 +22,9 @@ let addToCart = (token, itemid) => {
 
   if (idx === -1) return { success: false, reason: "Item not found" };
 
-  let [cart, idx] = getCart(username);
+  let [cart, cidx] = getCart(username);
 
-  carts[idx].cart.push(item);
+  carts[cidx].cart.push(item);
 };
 
 let changePassowrd = (token, oldPassword, newPassword) => {
