@@ -67,7 +67,7 @@ let checkout = (token) => {
 
   console.log("listings", JSON.stringify(listings));
   console.log("cart", JSON.stringify(carts[idx]));
-  for (const c in carts[idx].cart) {
+  for (let c in carts[idx].cart) {
     let [item, iidx] = getItem(c.itemid);
     console.log(
       JSON.stringify(c) || "cart item",
