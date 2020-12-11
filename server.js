@@ -6,11 +6,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-
 let carts = [];
 let users = [];
 let loggedinUsers = [];
 let listings = [];
+let getCartCount = 0;
 
 let addToCart = (token, itemid) => {
   let [tokenCheck, username] = validateToken(token);
@@ -78,6 +78,7 @@ let createNewUser = (username, password) => {
 };
 
 let getCart = (username) => {
+    console.log("in get cart count:", getCartCount++);
   let idx = carts
     .map((e) => {
       return e.username;
