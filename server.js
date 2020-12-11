@@ -7,9 +7,25 @@ const cors = require("cors");
 
 const app = express();
 
+let carts = [];
 let users = [];
 let loggedinUsers = [];
 let listings = [];
+
+let addToCart = (token, itemid) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  if (itemid === "") return { success: false, reason: "itemid field missing" };
+
+  let [item, idx] = getItem(itemid);
+
+  if (idx === -1) return { success: false, reason: "Item not found" };
+
+  let [cart, idx] = getCart(username);
+
+  carts[idx].cart.push(item);
+};
 
 let changePassowrd = (token, oldPassword, newPassword) => {
   let [tokenCheck, username] = validateToken(token);
@@ -59,6 +75,21 @@ let createNewUser = (username, password) => {
   users.push({ username: username, password: password });
 
   return { success: true };
+};
+
+let getCart = (username) => {
+  let idx = carts
+    .map((e) => {
+      return e.username;
+    })
+    .indexOf(username);
+
+  if (idx === -1) {
+    idx = carts.length;
+    carts.push({ username, cart: [] });
+  }
+
+  return [carts[idx], idx];
 };
 
 let getItem = (itemId) => {
@@ -155,6 +186,12 @@ app.get("/sourcecode", (req, res) => {
 
 app.get("/", (request, response) => {
   response.sendFile(__dirname + "/views/index.html");
+});
+
+app.post("/add-to-cart", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = addToCart(request.header("token") || "", values.itemid || "");
+  response.json(res);
 });
 
 app.post("/change-password", (request, response) => {
