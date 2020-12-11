@@ -67,15 +67,19 @@ let checkout = (token) => {
 
   for (const c in carts[idx].cart) {
     let [item, iidx] = getItem(c.itemid);
-    console.log(c.itemid ||"", JSON.stringify(item) || "", iidx);
-    if (iidx === -1) {
+    console.log(
+      JSON.stringify(c),
+      c.itemid || "null itemid",
+      JSON.stringify(item) || "null item",
+      iidx
+    );
+    if (iidx === -1)
       return { success: false, reason: "Item in cart no longer available" };
-    }
     let [_, pidx] = getPurchases(username);
     purchases[pidx].purchased.push(item);
     listings = listings.splice(iidx, 1);
   }
-  return { success: true };;
+  return { success: true };
 };
 
 let createListing = (token, price, description) => {
