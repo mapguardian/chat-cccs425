@@ -120,7 +120,7 @@ let modifyListing = (token, itemId, description, price) => {
 
   let item = getItem(itemId);
 
-  if (item.sellerUsername !== username) return { success: false };
+  //if (item.sellerUsername !== username) return { success: false };
 
   item.price = price;
   item.description = description;
