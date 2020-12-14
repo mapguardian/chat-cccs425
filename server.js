@@ -299,8 +299,10 @@ app.get("/cart", (request, response) => {
 });
 
 app.post("/chat", (request, response) => {
-  console.log("chat->request.body",JSON.stringify(request.body));
-  let values = JSON.parse(request.body || "");
+  console.log("chat->request.body", JSON.stringify(request.body));
+  let values = {};
+  if (JSON.stringify(request.body) !== JSON.stringify({}))
+    values = JSON.parse(request.body || "");
   console.log("chat->values", values);
   let res = chat(
     request.header("token") || "",
