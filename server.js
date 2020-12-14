@@ -81,7 +81,7 @@ let checkout = (token) => {
       return { success: false, reason: "Item in cart no longer available" };
     let [_, pidx] = getPurchases(username);
     purchases[pidx].purchased.push(item);
-    listings = listings.splice(iidx, 1);
+    listings.splice(iidx, 1);
   }
   return { success: true };
 };
