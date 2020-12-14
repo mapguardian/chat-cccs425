@@ -215,6 +215,14 @@ let modifyListing = (token, itemId, price, description) => {
   return { success: true };
 };
 
+let pruchaseHistory = (token) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  let [history, _] = getPurchases(username);
+  return { success: true, purchased: history };
+};
+
 let validateToken = (token) => {
   if (token === "")
     return [{ success: false, reason: "token field missing" }, undefined];
@@ -300,6 +308,11 @@ app.post("/modify-listing", (request, response) => {
     values.price || "",
     values.description || ""
   );
+  response.json(res);
+});
+
+app.get("/purchase-history", (request, response) => {
+  let res = pruchaseHistory(request.header("token") || "");
   response.json(res);
 });
 
