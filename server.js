@@ -67,7 +67,7 @@ let chat = (token, destination, content) => {
   if (content === "")
     return { success: false, reason: "contents field missing" };
 
-  if (!users.find((u) => u.username === username))
+  if (!users.find((u) => u.username === destination))
     return { success: false, reason: "Destination user does not exist" };
 
   let messageRoom = [username, destination].sort().join();
