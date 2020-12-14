@@ -344,7 +344,7 @@ app.post("/chat-messages", (request, resposne) => {
   if (JSON.stringify(request.body) !== JSON.stringify({}))
     values = JSON.parse(request.body || "");
 
-  let res = chatMessages(request.header("token") || "", values.destination);
+  let res = chatMessages(request.header("token") || "", values.destination || "");
   response.json(res);
 });
 
