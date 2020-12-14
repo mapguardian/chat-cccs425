@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { response } = require("express");
 
 const app = express();
 let carts = [];
@@ -74,6 +75,22 @@ let chat = (token, destination, content) => {
   let [m, midx] = getMessageRoom(messageRoom);
   messages[midx].messages.push({ from: username, contents: content });
   return { success: true };
+};
+
+let chatMessages = (token, destination) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  if (destination === "")
+    return { success: false, reason: "destination field missing" };
+
+  if (!users.find((u) => u.username === destination))
+    return { success: false, reason: "Destination user not found" };
+
+  let messageRoom = [username, destination].sort().join();
+  let [m, midx] = getMessageRoom(messageRoom);
+
+  return { success: true, messages: m.messages };
 };
 
 let checkout = (token) => {
@@ -298,6 +315,16 @@ app.get("/cart", (request, response) => {
   response.json(res);
 });
 
+app.post("/change-password", (request, response) => {
+  let values = JSON.parse(request.body);
+  let res = changePassowrd(
+    request.header("token") || "",
+    values.oldPassword || "",
+    values.newPassword || ""
+  );
+  response.json(res);
+});
+
 app.post("/chat", (request, response) => {
   console.log("chat->request.body", JSON.stringify(request.body));
   let values = {};
@@ -312,13 +339,12 @@ app.post("/chat", (request, response) => {
   response.json(res);
 });
 
-app.post("/change-password", (request, response) => {
-  let values = JSON.parse(request.body);
-  let res = changePassowrd(
-    request.header("token") || "",
-    values.oldPassword || "",
-    values.newPassword || ""
-  );
+app.post("/chat-messages", (request, resposne) => {
+  let values = {};
+  if (JSON.stringify(request.body) !== JSON.stringify({}))
+    values = JSON.parse(request.body || "");
+
+  let res = chatMessages(request.header("token") || "", values.destination);
   response.json(res);
 });
 
