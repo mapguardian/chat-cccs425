@@ -88,8 +88,8 @@ let chatMessages = (token, destination) => {
     return { success: false, reason: "Destination user not found" };
 
   let messageRoom = [username, destination].sort().join();
-  let [m, midx] = getMessageRoom(messageRoom);
-
+  let [m, midx] = getMessageRoom(messageRoom);console
+  console.log("m->messages", JSON.stringify(m.messages));
   return { success: true, messages: m.messages };
 };
 
