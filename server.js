@@ -300,6 +300,7 @@ app.get("/cart", (request, response) => {
 
 app.post("/chat", (request, response) => {
     let values = JSON.parse(request.body);
+    console.log("chat->values", values);
     let res = chat(request.header("token") || "", values.destination || "", values.contents || "");
     response.json(res);
   });
