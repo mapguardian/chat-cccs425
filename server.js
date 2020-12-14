@@ -70,6 +70,8 @@ let checkout = (token) => {
   for (i = 0; i < cart.length; i++) {
     let [item, iidx] = getItem(cart[i].itemId);
     console.log(
+      "i:",
+      i,
       JSON.stringify(cart[i]) || "cart item",
       cart[i].itemId || "null itemid",
       JSON.stringify(item) || "null item",
