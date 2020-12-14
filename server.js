@@ -220,7 +220,7 @@ let pruchaseHistory = (token) => {
   if (!tokenCheck.success) return tokenCheck;
 
   let [history, _] = getPurchases(username);
-  return { success: true, purchased: history };
+  return { success: true, purchased: history.purchased };
 };
 
 let validateToken = (token) => {
