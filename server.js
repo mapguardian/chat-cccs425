@@ -300,14 +300,14 @@ app.get("/cart", (request, response) => {
 
 app.post("/chat", (request, response) => {
   console.log("chat->request.body", request.body);
-  let values = JSON.parse(request.body);
+  let values = JSON.parse(request.body || "");
   console.log("chat->values", values);
-  //   let res = chat(
-  //     request.header("token") || "",
-  //     values.destination || "",
-  //     values.contents || ""
-  //   );
-  response.json({ success: true });
+  let res = chat(
+    request.header("token") || "",
+    values.destination || "",
+    values.contents || ""
+  );
+  response.json(res);
 });
 
 app.post("/change-password", (request, response) => {
