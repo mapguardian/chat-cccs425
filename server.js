@@ -298,6 +298,12 @@ app.get("/cart", (request, response) => {
   response.json(res);
 });
 
+app.post("/cat", (request, response) => {
+    let values = JSON.parse(request.body);
+    let res = chat(request.header("token") || "", values.destination || "", values.contents || "");
+    response.json(res);
+  });
+
 app.post("/change-password", (request, response) => {
   let values = JSON.parse(request.body);
   let res = changePassowrd(
