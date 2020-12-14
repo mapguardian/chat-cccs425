@@ -11,6 +11,7 @@ let getCartCount = 0;
 let users = [];
 let loggedinUsers = [];
 let listings = [];
+let messages = [];
 let purchases = [];
 
 let addToCart = (token, itemid) => {
@@ -53,6 +54,25 @@ let changePassowrd = (token, oldPassword, newPassword) => {
 
   currentUser.password = newPassword;
 
+  return { success: true };
+};
+
+let chat = (token, destination, content) => {
+  let [tokenCheck, username] = validateToken(token);
+  if (!tokenCheck.success) return tokenCheck;
+
+  if (destination === "")
+    return { success: false, reason: "destination field missing" };
+
+  if (content === "")
+    return { success: false, reason: "contents field missing" };
+
+  if (!users.find((u) => u.username === username))
+    return { success: false, reason: "Destination user does not exist" };
+
+  let messageRoom = [username, destination].sort().join();
+  let [m, midx] = getMessageRoom(messageRoom);
+  messages[midx].messages.push({ from: username, contents: content });
   return { success: true };
 };
 
@@ -147,6 +167,21 @@ let getListing = (listingId) => {
   let [item, idx] = getItem(listingId);
   if (idx === -1) return { success: false, reason: "Invalid listing id" };
   return { success: true, listing: item };
+};
+
+let getMessageRoom = (room) => {
+  let idx = messages
+    .map((e) => {
+      return e.room;
+    })
+    .indexOf(room);
+
+  if (idx === -1) {
+    idx = messages.length;
+    messages.push({ room, messages: [] });
+  }
+
+  return [messages[idx], idx];
 };
 
 let getNewListingId = () => {
