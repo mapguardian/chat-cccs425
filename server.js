@@ -34,7 +34,7 @@ let cart = (token) => {
 
   let [cart, _] = getCart(username);
 
-  return { success: true, cart: cart.cart };
+  return { success: true, cart: cart };
 };
 
 let changePassowrd = (token, oldPassword, newPassword) => {
@@ -60,18 +60,18 @@ let checkout = (token) => {
   let [tokenCheck, username] = validateToken(token);
   if (!tokenCheck.success) return tokenCheck;
 
-  let [_, idx] = getCart(username);
-  if (carts[idx].cart === undefined || carts[idx].cart.length === 0) {
+  let [cart, idx] = getCart(username);
+  if (cart === undefined || cart.length === 0) {
     return { success: false, reason: "Empty cart" };
   }
 
   console.log("listings", JSON.stringify(listings));
-  console.log("cart", JSON.stringify(carts[idx]));
-  for (let c in carts[idx].cart) {
-    let [item, iidx] = getItem(c.itemid);
+  console.log("cart", JSON.stringify(cart));
+  for (i = 0; i < cart.length; i++) {
+    let [item, iidx] = getItem(cart[i].itemId);
     console.log(
-      JSON.stringify(c) || "cart item",
-      c.itemid || "null itemid",
+      JSON.stringify(cart[i]) || "cart item",
+      cart[i].itemId || "null itemid",
       JSON.stringify(item) || "null item",
       iidx
     );
@@ -128,7 +128,7 @@ let getCart = (username) => {
     idx = carts.length - 1;
   }
 
-  return [carts[idx], idx];
+  return [carts[idx].cart, idx];
 };
 
 let getItem = (itemId) => {
