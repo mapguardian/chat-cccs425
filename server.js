@@ -65,9 +65,9 @@ let checkout = (token) => {
     return { success: false, reason: "Empty cart" };
   }
 
-  console.log("listings", JSON.stringify(listings));
   console.log("cart", JSON.stringify(cart));
   for (i = 0; i < cart.length; i++) {
+    console.log("listings", JSON.stringify(listings));
     let [item, iidx] = getItem(cart[i].itemId);
     console.log(
       "i:",
