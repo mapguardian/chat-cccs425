@@ -339,7 +339,7 @@ app.post("/chat", (request, response) => {
   response.json(res);
 });
 
-app.post("/chat-messages", (request, resposne) => {
+app.post("/chat-messages", (request, response) => {
   let values = {};
   if (JSON.stringify(request.body) !== JSON.stringify({}))
     values = JSON.parse(request.body || "");
