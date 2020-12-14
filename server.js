@@ -298,7 +298,7 @@ app.get("/cart", (request, response) => {
   response.json(res);
 });
 
-app.post("/cat", (request, response) => {
+app.post("/chat", (request, response) => {
     let values = JSON.parse(request.body);
     let res = chat(request.header("token") || "", values.destination || "", values.contents || "");
     response.json(res);
