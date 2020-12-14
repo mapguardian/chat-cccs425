@@ -299,6 +299,7 @@ app.get("/cart", (request, response) => {
 });
 
 app.post("/chat", (request, response) => {
+  console.log("chat->request.body", request.body);
   let values = JSON.parse(request.body);
   console.log("chat->values", values);
   //   let res = chat(
